@@ -26,9 +26,6 @@ shaka.ui.HiddenFastForwardButton = class extends shaka.ui.Element {
   constructor(parent, controls) {
     super(parent, controls);
 
-    /** @private {?number} */
-    this.lastTouchEventTimeSet_ = null;
-
     /** @private {?boolean} */
     this.triggeredTouchValid_ = false;
 
@@ -71,7 +68,7 @@ shaka.ui.HiddenFastForwardButton = class extends shaka.ui.Element {
     /** @private {!HTMLElement} */
     this.fastforwardIcon_ = shaka.util.Dom.createHTMLElement('span');
     this.fastforwardIcon_.classList
-        .add('shaka-forward-rewind-on-controls-container-icon');
+        .add('shaka-seeking-on-controls-container-icon');
     this.fastforwardIcon_.textContent =
         shaka.ui.Enums.MaterialDesignIcons.FAST_FORWARD;
     this.fastforwardContainer_.appendChild(this.fastforwardIcon_);
@@ -83,23 +80,17 @@ shaka.ui.HiddenFastForwardButton = class extends shaka.ui.Element {
    * @private
    */
   onFastForwardButtonClick_() {
-    // this stores the time for first touch and makes touch valid for
-    // next 1s so incase the touch event is triggered again within 1s
-    // this if condition fails and the video seeking happens.
+    // The first tap causes the element to become visible. Subsequent taps seek.
     if (!this.triggeredTouchValid_) {
       this.triggeredTouchValid_ = true;
-      this.lastTouchEventTimeSet_ = Date.now();
-      this.hideFastForwardButtonOnControlsContainerTimer_.tickAfter(1);
-    } else if (this.lastTouchEventTimeSet_+1000 > Date.now()) {
-      // stops hidding of fast-forward button incase the timmer is active
-      // because of previous touch event.
-      this.hideFastForwardButtonOnControlsContainerTimer_.stop();
-      this.lastTouchEventTimeSet_ = Date.now();
-      this.fastForwardValue_.textContent =
-        (parseInt(this.fastForwardValue_.textContent, 10) + 5).toString() + 's';
-      this.fastforwardContainer_.style.opacity = '1';
       this.hideFastForwardButtonOnControlsContainerTimer_.tickAfter(1);
     }
+    // stops hidding of fast-forward button incase the timmer is active
+    // because of previous touch event.
+    this.fastForwardValue_.textContent =
+        `+${(parseInt(this.fastForwardValue_.textContent, 10) + 5).toString()}s`;
+    this.fastforwardContainer_.style.opacity = '1';
+    this.hideFastForwardButtonOnControlsContainerTimer_.tickAfter(1);
   }
 
   /**
@@ -107,7 +98,7 @@ shaka.ui.HiddenFastForwardButton = class extends shaka.ui.Element {
    */
   hideFastForwardButtonOnControlsContainer() {
     // prevent adding seek value if its a single tap.
-    if (parseInt(this.fastForwardValue_.textContent, 10) != 0) {
+    if (parseInt(this.fastForwardValue_.textContent, 10) !== 0) {
       this.video.currentTime = this.controls.getDisplayTime() + parseInt(
           this.fastForwardValue_.textContent, 10);
     }

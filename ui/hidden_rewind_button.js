@@ -26,9 +26,6 @@ shaka.ui.HiddenRewindButton = class extends shaka.ui.Element {
   constructor(parent, controls) {
     super(parent, controls);
 
-    /** @private {?number} */
-    this.lastTouchEventTimeSet_ = null;
-
     /** @private {?boolean} */
     this.triggeredTouchValid_ = false;
 
@@ -69,7 +66,7 @@ shaka.ui.HiddenRewindButton = class extends shaka.ui.Element {
     /** @private {!HTMLElement} */
     this.rewindIcon_ = shaka.util.Dom.createHTMLElement('span');
     this.rewindIcon_.classList
-        .add('shaka-forward-rewind-on-controls-container-icon');
+        .add('shaka-seeking-on-controls-container-icon');
     this.rewindIcon_.textContent =
         shaka.ui.Enums.MaterialDesignIcons.REWIND;
     this.rewindContainer_.appendChild(this.rewindIcon_);
@@ -81,23 +78,17 @@ shaka.ui.HiddenRewindButton = class extends shaka.ui.Element {
    * @private
    */
   onRewindButtonClick_() {
-    // this stores the time for first touch and makes touch valid for
-    // next 1s so incase the touch event is triggered again within 1s
-    // this if condition fails and the video seeking happens.
+    // The first tap causes the element to become visible. Subsequent taps seek.
     if (!this.triggeredTouchValid_) {
       this.triggeredTouchValid_ = true;
-      this.lastTouchEventTimeSet_ = Date.now();
-      this.hideRewindButtonOnControlsContainerTimer_.tickAfter(1);
-    } else if (this.lastTouchEventTimeSet_+1000 > Date.now()) {
-      // stops hidding of fast-forward button incase the timmer is active
-      // because of previous touch event.
-      this.hideRewindButtonOnControlsContainerTimer_.stop();
-      this.lastTouchEventTimeSet_ = Date.now();
-      this.rewindValue_.textContent =
-        (parseInt(this.rewindValue_.textContent, 10) - 5).toString() + 's';
-      this.rewindContainer_.style.opacity = '1';
       this.hideRewindButtonOnControlsContainerTimer_.tickAfter(1);
     }
+    // stops hidding of fast-forward button incase the timmer is active
+    // because of previous touch event.
+    this.rewindValue_.textContent =
+        `-${(parseInt(this.rewindValue_.textContent, 10) - 5).toString()}s`;
+    this.rewindContainer_.style.opacity = '1';
+    this.hideRewindButtonOnControlsContainerTimer_.tickAfter(1);
   }
 
   /**
@@ -105,7 +96,7 @@ shaka.ui.HiddenRewindButton = class extends shaka.ui.Element {
    */
   hideRewindButtonOnControlsContainer() {
     // prevent adding seek value if its a single tap.
-    if (parseInt(this.rewindValue_.textContent, 10) != 0) {
+    if (parseInt(this.rewindValue_.textContent, 10) !== 0) {
       this.video.currentTime = this.controls.getDisplayTime() + parseInt(
           this.rewindValue_.textContent, 10);
     }

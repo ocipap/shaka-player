@@ -20,7 +20,7 @@ goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.SeekBar');
 goog.require('shaka.ui.Utils');
-goog.require('shaka.ui.HiddenFastForwardButton');
+goog.require('shaka.ui.SeekingButton');
 goog.require('shaka.ui.HiddenRewindButton');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.EventManager');
@@ -868,9 +868,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         'shaka-hidden-fast-forward-container');
     this.controlsContainer_.appendChild(hiddenFastForwardContainer);
 
-    /** @private {shaka.ui.HiddenFastForwardButton} */
+    /** @private {shaka.ui.SeekingButton} */
     this.hiddenFastForwardButton_ =
-        new shaka.ui.HiddenFastForwardButton(hiddenFastForwardContainer, this);
+        new shaka.ui.SeekingButton(hiddenFastForwardContainer, this);
     this.elements_.push(this.hiddenFastForwardButton_);
   }
 
